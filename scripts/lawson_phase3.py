@@ -35,7 +35,7 @@ def receive_sphere_params(data):
 	global Ball_Pos_Cam
 	global valid_sphere_params
 	
-	if !pause_tracking:
+	if not pause_tracking:
 		# Store x,y,z coordinates of the ball w.r.t the camera
 		Ball_Pos_Cam.point.x = data.xc
 		Ball_Pos_Cam.point.y = data.yc
