@@ -109,10 +109,12 @@ def generate_plan(ball_pos, tool_pos):
 	plan.modes.append(pup_mode)
 	
 	# Pickup ball
-	plan.points.append(pickup_pos)
+	pickup_ball = create_waypoint(pickup_pos.linear.x, pickup_pos.linear.y, pickup_pos.linear.z - 0.01, tool_pos.angular.x, tool_pos.angular.y, tool_pos.angular.z)
+	plan.points.append(pickup_ball)
 	pu_mode = create_control_mode(2)
 	plan.modes.append(pu_mode)
 	
+
 	# Return to above ball
 	plan.points.append(above_ball)
 	rab_mode = create_control_mode(0)
@@ -120,7 +122,7 @@ def generate_plan(ball_pos, tool_pos):
 	
 	
 	# Above the drop point
-	above_drop = create_waypoint(ball_pos.point.x, ball_pos.point.y - 0.25, tool_pos.linear.z, tool_pos.angular.x, tool_pos.angular.y, tool_pos.angular.z)
+	above_drop = create_waypoint(ball_pos.point.x, ball_pos.point.y - 0.10, tool_pos.linear.z, tool_pos.angular.x, tool_pos.angular.y, tool_pos.angular.z)
 	plan.points.append(above_drop)
 	ad_mode = create_control_mode(0)
 	plan.modes.append(ad_mode)
@@ -133,9 +135,11 @@ def generate_plan(ball_pos, tool_pos):
 	plan.modes.append(drpp_mode)
 	
 	# Drop the ball
-	plan.points.append(drop_pos)
+	drop_ball = create_waypoint(drop_pos.linear.x, drop_pos.linear.y, drop_pos.linear.z - 0.01, tool_pos.angular.x, tool_pos.angular.y, tool_pos.angular.z) 
+	plan.points.append(drop_ball)
 	drp_mode = create_control_mode(1)
 	plan.modes.append(drp_mode)
+	
 	
 	# Return to above drop
 	plan.points.append(above_drop)
