@@ -24,22 +24,16 @@ first_reading = True
 # Safety measure booleans
 generate_new_plan = True
 hold_movement = True
-pause_tracking = False
-
-def receive_tracking_pause(data):
-	global pause_tracking
-	
-	pause_tracking = data.data
 
 def receive_sphere_params(data):
 	global Ball_Pos_Cam
 	global valid_sphere_params
 	
-	if not pause_tracking:
-		# Store x,y,z coordinates of the ball w.r.t the camera
-		Ball_Pos_Cam.point.x = data.xc
-		Ball_Pos_Cam.point.y = data.yc
-		Ball_Pos_Cam.point.z = data.zc
+	
+	# Store x,y,z coordinates of the ball w.r.t the camera
+	Ball_Pos_Cam.point.x = data.xc
+	Ball_Pos_Cam.point.y = data.yc
+	Ball_Pos_Cam.point.z = data.zc
 	# Flip to true since we have received data
 	valid_sphere_params = True
 	
@@ -109,7 +103,7 @@ def generate_plan(ball_pos, tool_pos):
 	
 	
 	# Pickup position
-	pickup_pos = create_waypoint(ball_pos.point.x, ball_pos.point.y, ball_pos.point.z, tool_pos.angular.x, tool_pos.angular.y, tool_pos.angular.z)
+	pickup_pos = create_waypoint(ball_pos.point.x, ball_pos.point.y, ball_pos.point.z + 0.025, tool_pos.angular.x, tool_pos.angular.y, tool_pos.angular.z)
 	plan.points.append(pickup_pos)
 	pup_mode = create_control_mode(0)
 	plan.modes.append(pup_mode)
@@ -133,7 +127,7 @@ def generate_plan(ball_pos, tool_pos):
 	
 	
 	# Drop position
-	drop_pos = create_waypoint(above_drop.linear.x, above_drop.linear.y, ball_pos.point.z, tool_pos.angular.x, tool_pos.angular.y, tool_pos.angular.z) 
+	drop_pos = create_waypoint(above_drop.linear.x, above_drop.linear.y, ball_pos.point.z + 0.025, tool_pos.angular.x, tool_pos.angular.y, tool_pos.angular.z) 
 	plan.points.append(drop_pos)
 	drpp_mode = create_control_mode(0)
 	plan.modes.append(drpp_mode)
@@ -166,8 +160,6 @@ if __name__ == '__main__':
 	plan_gen_sub = rospy.Subscriber('/generate_plan', Bool, receive_generate_signal)
 	# Subscribe to movement node
 	move_sub = rospy.Subscriber('/movement', Bool, receive_move_signal)
-	# Subscriber for pausing tracking
-	ball_tracking = rospy.Subscriber('/pause_tracking', Bool, receive_tracking_pause)
 	# Publisher for plan
 	plan_pub = rospy.Publisher('/plan', Plan, queue_size = 10)
 	
@@ -187,22 +179,21 @@ if __name__ == '__main__':
 			Ball_Pos_Base = tfBuffer.transform(Ball_Pos_Cam, 'base', rospy.Duration(1.0))
 			
 			# Generate a path plan
+			# Hold movement until the move_sub receives the signal to begin movement
 			if generate_new_plan:
 				print("Generating a plan...")
 				plan = generate_plan(Ball_Pos_Base, Tool_pose)
 				# Display Plan for review
 				print(plan)
+				print("Holding movement...")
 				# Do not generate a plan again, unless the plan_gen_sub receives a value of True
 				generate_new_plan = False
 			
-			# Hold movement until the move_sub receives the signal to begin movement
-			if hold_movement:
-				print("Holding movement...")
-			else:
-				# Publish the plan when ready
+			# Publish the plan when ready for movement
+			if not hold_movement:
 				plan_pub.publish(plan)
 				print("Moving....")
-		
+			
 			loop_rate.sleep()
 			
 		

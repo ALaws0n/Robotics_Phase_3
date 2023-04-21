@@ -113,8 +113,7 @@ def filter_sphere_params(Unfiltered_Sphere_Params, fil_gain):
 	# Set Filtered_Sphere_Params message values based off filter ouput
 	Filtered_Sphere_Params.xc = fil_x_out
 	Filtered_Sphere_Params.yc = fil_y_out
-	# Apply an offset to help raise the estimation above the table
-	Filtered_Sphere_Params.zc = fil_z_out + 0.02
+	Filtered_Sphere_Params.zc = fil_z_out
 	Filtered_Sphere_Params.radius = fil_r_out
 	
 	# Return Filtered Sphere Parameters
